@@ -1,13 +1,38 @@
 package com.tanmoy.javawebapp.controller;
 
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+import com.tanmoy.javawebapp.service.EmployeeService;
+
+@Controller
 public class HomeController {
 
+    private final EmployeeService employeeService;
+
+    public HomeController(EmployeeService employeeService) {
+        this.employeeService = employeeService;
+    }
+
     @GetMapping("/")
-    public String home() {
-        return "Welcome to the Java DevOps Employee Management Application";
+    public String home(Model model) {
+        var employees = employeeService.getEmployees();
+
+        long activeEmployees = employees.stream()
+                .filter(employee -> "Active".equalsIgnoreCase(employee.getStatus()))
+                .count();
+
+        long departments = employees.stream()
+                .map(employee -> employee.getDepartment())
+                .distinct()
+                .count();
+
+        model.addAttribute("employees", employees);
+        model.addAttribute("totalEmployees", employees.size());
+        model.addAttribute("activeEmployees", activeEmployees);
+        model.addAttribute("departments", departments);
+
+        return "dashboard";
     }
 }
