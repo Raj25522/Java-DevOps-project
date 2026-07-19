@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import com.tanmoy.javawebapp.service.EmployeeService;
 
+import com.tanmoy.javawebapp.model.Employee;
+
 @Controller
 public class HomeController {
 
@@ -24,7 +26,7 @@ public class HomeController {
                 .count();
 
         long departments = employees.stream()
-                .map(employee -> employee.getDepartment())
+                .map(Employee::getDepartment)
                 .distinct()
                 .count();
 
