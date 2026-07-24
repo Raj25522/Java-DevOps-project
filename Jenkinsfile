@@ -26,5 +26,19 @@ pipeline {
                 }
             }
         }
+
+        stage('SonarQube Analysis') {
+            steps {
+                dir('application') {
+                    withSonarQubeEnv('SonarQube') {
+                        sh '''
+                            mvn sonar:sonar \
+                              -Dsonar.projectKey=java-devops-eks-project \
+                              -Dsonar.projectName=java-devops-eks-project
+                        '''
+                    }
+                }
+            }
+        }
     }
 }
