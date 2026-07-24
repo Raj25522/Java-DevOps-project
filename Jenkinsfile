@@ -32,7 +32,7 @@ pipeline {
                 dir('application') {
                     withSonarQubeEnv('SonarQube') {
                         sh '''
-                            mvn sonar:sonar \
+                            mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
                               -Dsonar.projectKey=java-devops-eks-project \
                               -Dsonar.projectName=java-devops-eks-project
                         '''
