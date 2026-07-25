@@ -10,3 +10,5 @@ private_subnet_cidrs = [
   "10.0.3.0/24",
   "10.0.4.0/24"
 ]
+
+cluster_name = "java-webapp-eks"

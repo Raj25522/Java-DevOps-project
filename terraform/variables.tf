@@ -18,3 +18,8 @@ variable "private_subnet_cidrs" {
   description = "CIDR blocks for the private subnets"
   type        = list(string)
 }
+
+variable "cluster_name" {
+  description = "Name of the Amazon EKS cluster"
+  type        = string
+}
