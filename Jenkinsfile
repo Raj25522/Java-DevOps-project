@@ -48,5 +48,16 @@ pipeline {
                 }
             }
         }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                    docker build \
+                    -t java-webapp:${BUILD_NUMBER} \
+                    -t java-webapp:latest \
+                    application
+                '''
+            }
+        }
     }
 }
