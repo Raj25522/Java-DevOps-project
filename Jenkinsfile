@@ -5,6 +5,13 @@ pipeline {
         maven 'Maven-3'
     }
 
+    environment {
+        AWS_REGION      = 'ap-south-1'
+        ECR_REGISTRY    = '428847003845.dkr.ecr.ap-south-1.amazonaws.com'
+        ECR_REPOSITORY  = 'java-webapp'
+        AWS_PAGER       = ''
+    }
+
     stages {
         stage('Checkout Verification') {
             steps {
@@ -56,6 +63,44 @@ pipeline {
                     -t java-webapp:${BUILD_NUMBER} \
                     -t java-webapp:latest \
                     application
+                '''
+            }
+        }
+
+        stage('Login to Amazon ECR') {
+            steps {
+                sh '''
+                    aws ecr get-login-password --region ${AWS_REGION} |
+                    docker login \
+                    --username AWS \
+                    --password-stdin \
+                    ${ECR_REGISTRY}
+                '''
+            }
+        }
+
+        stage('Tag Docker Image') {
+            steps {
+                sh '''
+                    docker tag \
+                        java-webapp:${BUILD_NUMBER} \
+                        ${ECR_REGISTRY}/${ECR_REPOSITORY}:${BUILD_NUMBER}
+
+                    docker tag \
+                        java-webapp:${BUILD_NUMBER} \
+                        ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest
+                '''
+            }
+        }
+
+        stage('Push Docker Image to ECR') {
+            steps {
+                sh '''
+                    docker push \
+                        ${ECR_REGISTRY}/${ECR_REPOSITORY}:${BUILD_NUMBER}
+
+                    docker push \
+                        ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest
                 '''
             }
         }
