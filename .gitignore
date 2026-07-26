@@ -20,3 +20,5 @@ buildNumber.properties
 *.tfstate
 *.tfstate.*
 crash.log
+
+terraform/node-console.log

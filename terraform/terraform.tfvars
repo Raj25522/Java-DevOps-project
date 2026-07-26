@@ -12,3 +12,5 @@ private_subnet_cidrs = [
 ]
 
 cluster_name = "java-webapp-eks"
+
+kubernetes_version = "1.34"

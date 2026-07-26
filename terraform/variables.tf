@@ -23,3 +23,8 @@ variable "cluster_name" {
   description = "Name of the Amazon EKS cluster"
   type        = string
 }
+
+variable "kubernetes_version" {
+  description = "Kubernetes version for the Amazon EKS cluster"
+  type        = string
+}
