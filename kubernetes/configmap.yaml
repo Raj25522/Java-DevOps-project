@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: java-webapp-config
+  namespace: java-webapp
+
+data:
+  APP_NAME: "Java DevOps Project"
+  APP_VERSION: "Version 1"
+  ENVIRONMENT: "Development"

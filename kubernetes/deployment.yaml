@@ -24,10 +24,64 @@ spec:
           image: 428847003845.dkr.ecr.ap-south-1.amazonaws.com/java-webapp:latest
           imagePullPolicy: Always
 
+          env:
+
+            # ConfigMap
+            - name: APP_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: java-webapp-config
+                  key: APP_NAME
+
+            - name: APP_VERSION
+              valueFrom:
+                configMapKeyRef:
+                  name: java-webapp-config
+                  key: APP_VERSION
+
+            - name: ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: java-webapp-config
+                  key: ENVIRONMENT
+
+            # Secret
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: java-webapp-secret
+                  key: DB_USERNAME
+
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: java-webapp-secret
+                  key: DB_PASSWORD
+
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: java-webapp-secret
+                  key: API_KEY
+
           ports:
             - name: http
               containerPort: 8080
               protocol: TCP
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
 
           resources:
             requests:
