@@ -22,3 +22,5 @@ buildNumber.properties
 crash.log
 
 terraform/node-console.log
+
+kubernetes/iam_policy.json
