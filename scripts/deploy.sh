@@ -3,14 +3,6 @@
 set -e
 
 echo "===================================="
-echo "Updating kubeconfig"
-echo "===================================="
-
-aws eks update-kubeconfig \
-  --name java-webapp-eks \
-  --region ap-south-1
-
-echo "===================================="
 echo "Deploying new image"
 echo "===================================="
 
