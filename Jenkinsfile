@@ -13,8 +13,9 @@ pipeline {
     }
 
     stages {
-        stage('Checkout Verification') {
+        stage('Checkout Source Code') {
             steps {
+                checkout scm
                 echo 'Source code checked out successfully.'
             }
         }
@@ -23,6 +24,9 @@ pipeline {
             steps {
                 sh 'java -version'
                 sh 'mvn -version'
+                sh 'docker --version'
+                sh 'kubectl version --client'
+                sh 'aws --version'
             }
         }
 
@@ -101,6 +105,24 @@ pipeline {
 
                     docker push \
                         ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest
+                '''
+            }
+        }
+
+        stage('Deploy to Amazon EKS') {
+            steps {
+                sh '''
+                    chmod +x scripts/deploy.sh
+                    ./scripts/deploy.sh
+                '''
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh '''
+                    chmod +x scripts/verify.sh
+                    ./scripts/verify.sh
                 '''
             }
         }
