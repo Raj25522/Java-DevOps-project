@@ -344,51 +344,36 @@ CPU Utilization exceeded 290% and Kubernetes automatically scaled the applicatio
 
 ## Jenkins Pipeline
 
-```
-screenshots/jenkins/pipeline-success.png
-```
+![Jenkins Pipeline](screenshots/jenkins/pipeline-success.png)
 
 ## SonarQube
 
-```
-screenshots/sonarqube/quality-gate.png
-```
+![SonarQube](screenshots/sonarqube/quality-gate.png)
 
 ## Amazon ECR
 
-```
-screenshots/ecr/repository.png
-```
+![Amazon ECR](screenshots/ecr/repository.png)
 
 ## EKS Cluster
 
-```
-screenshots/eks/cluster.png
-```
+![EKS Cluster](screenshots/eks/cluster.png)
 
 ## Kubernetes Pods
 
-```
-screenshots/kubernetes/pods.png
-```
+![Kubernetes Pods](screenshots/kubernetes/pods.png)
 
 ## ALB Application
 
-```
-screenshots/application/employeehub.png
-```
+![EmployeeHub](screenshots/application/employeehub.png)
 
 ## Grafana Dashboard
 
-```
-screenshots/grafana/dashboard.png
-```
+![Grafana Dashboard](screenshots/grafana/dashboard1.png)
+![Grafana Dashboard](screenshots/grafana/dashboard2.png)
 
 ## HPA Scaling
 
-```
-screenshots/hpa/hpa-scaling.png
-```
+![HPA Scaling](screenshots/hpa/hpa-scaling.png)
 
 ---
 
