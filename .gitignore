@@ -24,3 +24,24 @@ crash.log
 terraform/node-console.log
 
 kubernetes/iam_policy.json
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Terraform plans
+*.tfplan
+
+# Maven build
+application/target/
+
+# Environment files
+.env
+.env.*
