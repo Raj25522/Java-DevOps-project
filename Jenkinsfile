@@ -6,34 +6,42 @@ pipeline {
     }
 
     environment {
-        AWS_REGION      = 'ap-south-1'
-        ECR_REGISTRY    = '428847003845.dkr.ecr.ap-south-1.amazonaws.com'
-        ECR_REPOSITORY  = 'java-webapp'
-        AWS_PAGER       = ''
+        APP_NAME = "java-webapp"
+        IMAGE_TAG = "${BUILD_NUMBER}"
+        DOCKER_IMAGE = "YOUR_DOCKERHUB_USERNAME/java-webapp:${BUILD_NUMBER}"
+        SONARQUBE_ENV = "sonarqube"
     }
 
     stages {
-        stage('Checkout Source Code') {
+
+        stage('Checkout Code') {
             steps {
-                checkout scm
-                echo 'Source code checked out successfully.'
+                git branch: 'main',
+                url: 'https://github.com/TanmoyDas02/java-devops-eks-project.git'
             }
         }
 
-        stage('Verify Tools') {
-            steps {
-                sh 'java -version'
-                sh 'mvn -version'
-                sh 'docker --version'
-                sh 'kubectl version --client'
-                sh 'aws --version'
-            }
-        }
-
-        stage('Build Application') {
+        stage('Dependency Check - OWASP') {
             steps {
                 dir('application') {
-                    sh 'mvn clean verify'
+                    sh '''
+                    mvn org.owasp:dependency-check-maven:check
+                    '''
+                }
+            }
+            post {
+                always {
+                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+                }
+            }
+        }
+
+        stage('Build & Unit Test') {
+            steps {
+                dir('application') {
+                    sh '''
+                    mvn clean test package
+                    '''
                 }
             }
         }
@@ -41,11 +49,11 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 dir('application') {
-                    withSonarQubeEnv('SonarQube') {
+                    withSonarQubeEnv('sonarqube') {
                         sh '''
-                            mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-                              -Dsonar.projectKey=java-devops-eks-project \
-                              -Dsonar.projectName=java-devops-eks-project
+                        mvn sonar:sonar \
+                        -Dsonar.projectKey=java-webapp \
+                        -Dsonar.projectName=java-webapp
                         '''
                     }
                 }
@@ -54,77 +62,79 @@ pipeline {
 
         stage('Quality Gate') {
             steps {
-                timeout(time: 5, unit: 'MINUTES') {
+                timeout(time: 10, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Trivy File System Scan') {
+            steps {
+                dir('application') {
+                    sh '''
+                    trivy fs . \
+                    --severity HIGH,CRITICAL
+                    '''
+                }
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                dir('application') {
+                    sh '''
+                    docker build -t ${DOCKER_IMAGE} .
+                    '''
+                }
+            }
+        }
+
+        stage('Trivy Image Scan') {
             steps {
                 sh '''
-                    docker build \
-                    -t java-webapp:${BUILD_NUMBER} \
-                    -t java-webapp:latest \
-                    application
+                trivy image \
+                --severity HIGH,CRITICAL \
+                ${DOCKER_IMAGE}
                 '''
             }
         }
 
-        stage('Login to Amazon ECR') {
+        stage('Docker Hub Login') {
             steps {
-                sh '''
-                    aws ecr get-login-password --region ${AWS_REGION} |
-                    docker login \
-                    --username AWS \
-                    --password-stdin \
-                    ${ECR_REGISTRY}
-                '''
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    sh '''
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    '''
+                }
             }
         }
 
-        stage('Tag Docker Image') {
+        stage('Push Docker Image') {
             steps {
                 sh '''
-                    docker tag \
-                        java-webapp:${BUILD_NUMBER} \
-                        ${ECR_REGISTRY}/${ECR_REPOSITORY}:${BUILD_NUMBER}
-
-                    docker tag \
-                        java-webapp:${BUILD_NUMBER} \
-                        ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest
+                docker push ${DOCKER_IMAGE}
                 '''
             }
         }
+    }
 
-        stage('Push Docker Image to ECR') {
-            steps {
-                sh '''
-                    docker push \
-                        ${ECR_REGISTRY}/${ECR_REPOSITORY}:${BUILD_NUMBER}
-
-                    docker push \
-                        ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest
-                '''
-            }
+    post {
+        success {
+            echo 'Pipeline completed successfully'
         }
 
-        stage('Deploy to Amazon EKS') {
-            steps {
-                sh '''
-                    chmod +x scripts/deploy.sh
-                    ./scripts/deploy.sh
-                '''
-            }
+        failure {
+            echo 'Pipeline failed'
         }
 
-        stage('Verify Deployment') {
-            steps {
-                sh '''
-                    chmod +x scripts/verify.sh
-                    ./scripts/verify.sh
-                '''
-            }
+        always {
+            cleanWs()
         }
     }
 }
