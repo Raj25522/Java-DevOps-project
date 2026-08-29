@@ -17,7 +17,7 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 git branch: 'main',
-                url: 'https://github.com/TanmoyDas02/java-devops-eks-project.git'
+                url: 'https://github.com/Raj25522/Java-DevOps-project.git'
             }
         }
 
